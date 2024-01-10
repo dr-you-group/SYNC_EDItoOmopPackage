@@ -19,7 +19,7 @@ Google Translation을 사용 할 수 있는 API KEY를 준비 해주세요.
   
 https://cloud.google.com/sdk/docs/install?authuser=2&hl=ko  
 
-**Install**  
+**GOOGLE TRANSLATION Install**  
   
 `pip install google-cloud-translate==2.0.1`  
   
