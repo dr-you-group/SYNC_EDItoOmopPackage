@@ -2,15 +2,15 @@
   
 jupyter를 이용해서 run_edi_package.ipynb 를 사용하는것을 권장 드립니다.  
 
-### Prepare  
-**pip list**  
-tqdm==4.66.1
-sqlalchemy==2.0.20
-pymssql==2.2.11
-pandas==2.1.0
-openpyxl==3.1.2
+## Prepare  
+**PIP LIST**  
+tqdm==4.66.1  
+sqlalchemy==2.0.20  
+pymssql==2.2.11  
+pandas==2.1.0  
+openpyxl==3.1.2  
 
-
+**GOOGLE TRANSLATION**  
 EDI concept name에 대해서 한글을 영문으로 바꾸어야 합니다. 이에 패키지는 Google Translation을 사용 합니다.  
 Google Translation을 사용 할 수 있는 API KEY를 준비 해주세요. 
 
@@ -26,7 +26,7 @@ https://cloud.google.com/sdk/docs/install?authuser=2&hl=ko
   
 `gcloud auth application-default login`  
 
-### How to Use 
+## How to Use 
 
 ``` python
 
