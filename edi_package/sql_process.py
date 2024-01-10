@@ -109,11 +109,11 @@ class DBConnect:
             # Insert the DataFrame into the MSSQL database
             df_piece.to_sql('#temp_table', engine, if_exists='append', index=False, method='multi', chunksize=1000)
     
-    def update_device(self, database, table, result_device):
+    def update_device(self, database, table, data):
 
         self._conn = pymssql.connect(host=self._hostname, user=self._user, password=self._password,port = self._port, database=self._database)
         self._cursor = self._conn.cursor()
-        device = self.check_null(result_device)
+        device = self.check_null(data)
         device = self.check_length(device)
         self.check_edi_table(database=database, table=table)
 
@@ -145,11 +145,8 @@ class DBConnect:
         check_length_data = self.check_length(check_null_data)
 
         # start_date = datetime.datetime.strptime(date, "%Y-%m-%d")
-        # roof를 돌기위한 임시용
-        end_date = datetime.datetime.strptime(date, "%Y.%m.%d") + relativedelta(months=1) - datetime.timedelta(days=1)
-        
-        # 이게 찐 코드
-        # end_date = datetime.datetime.strptime(date, "%Y.%m.%d") - datetime.timedelta(days=1)
+
+        end_date = datetime.datetime.strptime(date, "%Y.%m.%d") - datetime.timedelta(days=1)
 
         self.check_edi_table(database=database, table=table)
 

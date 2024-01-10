@@ -1,3 +1,2 @@
-from .edi_process import *
+from .device import *
 from .sql_process import *
-from .translation import *
