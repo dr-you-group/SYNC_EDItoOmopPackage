@@ -46,3 +46,13 @@ update() -> DataBase에 적재
 
 update_drug_relationship() -> Drug 주성분코드 추적을 위한 Table
 ```
+
+**고시 다운로드**
+
+https://www.hira.or.kr/rc/insu/insuadtcrtr/InsuAdtCrtrList.do?pgmid=HIRAA030069000400&WT.gnb=%EB%B3%B4%ED%97%98%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80
+
+- > Device(키워드 : 치료재료), Suga(키워드 : 수가)는 여기서 다운로드 받으시면 됩니다
+
+https://www.hira.or.kr/bbsDummy.do?pgmid=HIRAA030014050000&brdScnBltNo=4&brdBltNo=1676&pageIndex=1&pageIndex2=1
+
+- > Drug는 여기서 다운로드 받으시면 됩니다.
