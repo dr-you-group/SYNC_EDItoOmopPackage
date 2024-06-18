@@ -39,22 +39,20 @@ class SugaTransform:
                                         self._english_name : "concept_name",
                                         self._start_date_name : "valid_start_date",
                                         self._sanjung_name : "sanjung_name"}, inplace=True)
-        # except:
-        #     suga_data.rename(columns={suga_code : "concept_code",
-        #                         korean_name : "concept_synonym",
-        #                         start_date_name : "valid_start_date",
-        #                         sanjung_name : "sanjung_name"}, inplace=True)
-        #     suga_data["concept_name"] = np.nan
 
+
+        self._merge_suga_df = self._merge_suga_df.dropna(subset=["concept_code"],how='any')
+        self._merge_suga_df["concept_code"] = self._merge_suga_df["concept_code"].astype(str)
+        self._merge_suga_df["company_name"] = None
         self._merge_suga_df["domain_id"] = "Procedure"
         self._merge_suga_df["vocabulary_id"] = "EDI"
         self._merge_suga_df["valid_start_date"] = self._merge_suga_df["valid_start_date"].apply(lambda x: datetime.datetime.strptime("1970-01-01", "%Y-%m-%d") if pd.isna(x) else x)
         self._merge_suga_df["valid_end_date"] = datetime.datetime.strptime("2099-12-31", "%Y-%m-%d")
-        self._merge_suga_df["invalid_reason"] = np.nan
-        self._merge_suga_df["previous_concept_code"] = np.nan
-        self._merge_suga_df["material"] = np.nan
+        self._merge_suga_df["invalid_reason"] = None
+        self._merge_suga_df["previous_concept_code"] = None
+        self._merge_suga_df["material"] = None
         try:
-            self._merge_suga_df.loc[self._merge_suga_df['concept_name'].str.contains(r"[ㄱ-ㅣ가-힣]") == True, "concept_name"] = np.nan
+            self._merge_suga_df.loc[self._merge_suga_df['concept_name'].str.contains(r"[ㄱ-ㅣ가-힣]") == True, "concept_name"] = None
         except:
             pass
 
@@ -64,20 +62,23 @@ class SugaTransform:
         self._merge_suga_df["concept_synonym"] = self._merge_suga_df["concept_synonym"].str.strip()
         self._merge_suga_df["sanjung_name"] = self._merge_suga_df["sanjung_name"].str.strip()
 
+        self._merge_suga_df["company_name"] = None
+        self._merge_suga_df["value"] = None
+        self._merge_suga_df["unit"] = None
 
         # 문자열에 공백만 있는 데이터가 있음. 이럴땐 Nan으로 처리가 안되어서 Nan으로 바꿔줘야함.
-        self._merge_suga_df["concept_code"] = self._merge_suga_df["concept_code"].replace(r'^\s*$', np.nan, regex=True)
-        self._merge_suga_df["concept_name"] = self._merge_suga_df["concept_name"].replace(r'^\s*$', np.nan, regex=True)
-        self._merge_suga_df["concept_synonym"] = self._merge_suga_df["concept_synonym"].replace(r'^\s*$', np.nan, regex=True)
-        self._merge_suga_df["sanjung_name"] = self._merge_suga_df["sanjung_name"].replace(r'^\s*$', np.nan, regex=True)
+        self._merge_suga_df["concept_code"] = self._merge_suga_df["concept_code"].replace(r'^\s*$', None, regex=True)
+        self._merge_suga_df["concept_name"] = self._merge_suga_df["concept_name"].replace(r'^\s*$', None, regex=True)
+        self._merge_suga_df["concept_synonym"] = self._merge_suga_df["concept_synonym"].replace(r'^\s*$', None, regex=True)
+        self._merge_suga_df["sanjung_name"] = self._merge_suga_df["sanjung_name"].replace(r'^\s*$', None, regex=True)
 
 
         self._merge_suga_df["ancestor_concept_code"] = self._merge_suga_df["concept_code"].apply(lambda x:x[0:5])
         self._merge_suga_df["concept_class_id"] = "Proc Hierarchy"
 
-        self._merge_suga_df.loc[self._merge_suga_df["ancestor_concept_code"] == self._merge_suga_df["concept_code"], "ancestor_concept_code"] = np.nan
+        self._merge_suga_df.loc[self._merge_suga_df["ancestor_concept_code"] == self._merge_suga_df["concept_code"], "ancestor_concept_code"] = None
 
-        self._merge_suga_df.loc[~self._merge_suga_df["ancestor_concept_code"].isin(self._merge_suga_df["concept_code"]), "ancestor_concept_code"] = np.nan
+        self._merge_suga_df.loc[~self._merge_suga_df["ancestor_concept_code"].isin(self._merge_suga_df["concept_code"]), "ancestor_concept_code"] = None
 
         self._merge_suga_df.loc[self._merge_suga_df["concept_code"].str.match(r"^A[AH]|^[BCDEFG]|^H[AC]|^FA", na=False), "domain_id"] = "Measurement"
 
@@ -119,7 +120,7 @@ class SugaTransform:
         try:
             merge_data[self._english_name]
         except:
-            merge_data[self._english_name] = np.nan
+            merge_data[self._english_name] = None
 
 
         self._merge_suga_df = merge_data[[self._suga_code, self._korean_name, self._english_name, self._start_date_name, self._sanjung_name]]
@@ -141,7 +142,6 @@ class SugaTranslate:
     def data_save(self, result_df):
         
         result = pd.concat([self._translation_df, result_df],axis=0).drop_duplicates(["concept_synonym"])
-
         save_path = "./result_translate_file"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
@@ -195,7 +195,7 @@ class SugaTranslate:
 
         # concept_name start
         try:
-            self._suga_df.loc[self._suga_df['concept_name'].str.contains(r"[ㄱ-ㅣ가-힣]") == True, "concept_name"] = np.nan
+            self._suga_df.loc[self._suga_df['concept_name'].str.contains(r"[ㄱ-ㅣ가-힣]") == True, "concept_name"] = None
 
         except:
             pass
@@ -233,6 +233,8 @@ class SugaTranslate:
         self.update_translation_csv()
 
         if (int(self._translation_df["concept_synonym"].duplicated().sum()) >0) == True:
+            
+
             raise Exception("Korean names in the dictionary should be unique")
 
         self._translation_df.rename(columns={"concept_name":"concept_name_tr"}, inplace=True)

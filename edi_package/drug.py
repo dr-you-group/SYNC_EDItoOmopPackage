@@ -14,7 +14,7 @@ import codecs
 
 class DrugTransform:
 
-    def __init__(self, drug_data, sheet_name, drug_code, drug_name, clinical_drug_code, previous_concept_code):
+    def __init__(self, drug_data, sheet_name, drug_code, drug_name, clinical_drug_code, previous_concept_code, company_name, value, unit, start_date):
         
         self._drug_data = drug_data
         self._sheet_name = sheet_name
@@ -22,6 +22,10 @@ class DrugTransform:
         self._drug_name = drug_name
         self._clinical_drug_code = clinical_drug_code
         self._previous_concept_code = previous_concept_code
+        self._company_name = company_name
+        self._value = value
+        self._unit = unit
+        self._start_date = start_date
         self._drug_df = None
 
     def data_transform(self):
@@ -31,33 +35,40 @@ class DrugTransform:
         self._drug_df.rename(columns={self._drug_code: "concept_code",
                                 self._drug_name : "concept_synonym",
                                 self._clinical_drug_code: "ancestor_concept_code",
+                                self._company_name : "company_name",
+                                self._value : "value",
+                                self._unit : "unit"
                                 }, inplace=True)
         
 
         if self._previous_concept_code not in self._drug_df.columns:
-            self._drug_df["previous_concept_code"] = np.nan
+            self._drug_df["previous_concept_code"] = None
         
         else:
             self._drug_df.rename(columns={self._previous_concept_code : "previous_concept_code"
                                     }, inplace=True)
+        self._drug_df["concept_code"] = self._drug_df["concept_code"].astype(str)
         self._drug_df["concept_name"] = self._drug_df["concept_code"].str.strip()
+        self._drug_df["company_name"] = self._drug_df["company_name"].astype(str)
+        self._drug_df["value"] = self._drug_df["value"].astype(str)
+        self._drug_df["unit"] = self._drug_df["unit"].astype(str)
         self._drug_df["concept_code"] = self._drug_df["concept_code"].apply(lambda x : "0" + x if len(x) == 8 else x)
         self._drug_df["domain_id"] = "Drug"
         self._drug_df["vocabulary_id"] = "EDI"
         self._drug_df["concept_class_id"] = "Drug Product"
         # drug_data["valid_start_date"] = drug_data["valid_start_date"].apply(lambda x: datetime.datetime.strptime("1970-01-01", "%Y-%m-%d") if pd.isna(x) else x)
-        self._drug_df["valid_start_date"] = datetime.datetime.strptime("1970-01-01", "%Y-%m-%d")
+        self._drug_df["valid_start_date"] = datetime.datetime.strptime(self._start_date, "%Y.%m.%d")
         self._drug_df["valid_end_date"] = datetime.datetime.strptime("2099-12-31", "%Y-%m-%d")
-        self._drug_df["invalid_reason"] = np.nan
-        self._drug_df["material"] = np.nan
-        self._drug_df["sanjung_name"] = np.nan
+        self._drug_df["invalid_reason"] = None
+        self._drug_df["material"] = None
+        self._drug_df["sanjung_name"] = None
         # 문자열 양측 공백 제거
         self._drug_df["concept_code"] = self._drug_df["concept_code"].str.strip()
         self._drug_df["concept_synonym"] = self._drug_df["concept_synonym"].str.strip()
 
         # # 문자열에 공백만 있는 데이터가 있음. 이럴땐 Nan으로 처리가 안되어서 Nan으로 바꿔줘야함.
-        self._drug_df["concept_code"] = self._drug_df["concept_code"].replace(r'^\s*$', np.nan, regex=True)
-        self._drug_df["concept_name"] = self._drug_df["concept_name"].replace(r'^\s*$', np.nan, regex=True)
+        self._drug_df["concept_code"] = self._drug_df["concept_code"].replace(r'^\s*$', None, regex=True)
+        self._drug_df["concept_name"] = self._drug_df["concept_name"].replace(r'^\s*$', None, regex=True)
         self._drug_df["concept_synonym"] = self._drug_df["concept_synonym"].replace(r'^\s*$', np.nan, regex=True)
 
         self._drug_df.loc[pd.isna(self._drug_df["concept_synonym"]), "vocabulary_id"] = "KDC"
@@ -75,10 +86,12 @@ class DrugTransform:
         drug_data_df["concept_name"] = drug_data_df["concept_name"].apply(lambda x : x.replace("   ", " "))
         drug_data_df["concept_name"] = drug_data_df["concept_name"].apply(lambda x : x.replace("  ", " "))
 
-
+        # previous_concept_code에 소수점 데이터가 있어서 처리 (12341.0 -> 12341)
+        # drug_data_df["previous_concept_code"] = drug_data_df["previous_concept_code"].apply(lambda x : None if pd.isna(x) == float else x)
+        drug_data_df["previous_concept_code"] = drug_data_df["previous_concept_code"].apply(lambda x : str(x) if pd.notna(x) == True else x)
+        
         drug_data_df = drug_data_df[["concept_code", "concept_name","concept_synonym","domain_id", "vocabulary_id", "concept_class_id",
-                    "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-                    "material","sanjung_name"]]
+                    "valid_start_date", "valid_end_date", "invalid_reason", "ancestor_concept_code" ,"previous_concept_code", "material", "sanjung_name", "company_name", "value", "unit"]]
         
         return drug_data_df
     
@@ -182,8 +195,7 @@ class DrugTranslate:
         if merge_kr_drug.loc[merge_kr_drug['concept_name'].str.contains(r"[ㄱ-ㅣ가-힣]") == True, "concept_name"].count() > 0:
             raise Exception("concept name only allows English")
 
-        result_drug = merge_kr_drug[["concept_code", "concept_name", "concept_synonym", "domain_id", "vocabulary_id", "concept_class_id",
-            "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-            "material","sanjung_name"]]
+        result_drug = merge_kr_drug[["concept_code", "concept_name","concept_synonym","domain_id", "vocabulary_id", "concept_class_id",
+                    "valid_start_date", "valid_end_date", "invalid_reason", "ancestor_concept_code" ,"previous_concept_code", "material", "sanjung_name", "company_name", "value", "unit"]]
 
         return result_drug

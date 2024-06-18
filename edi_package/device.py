@@ -17,7 +17,7 @@ import codecs
 class DeviceTransform:
 
     def __init__(self, device_data, del_device_data, device_code, device_name, start_date_name,
-                end_date_name, material_name, date):
+                end_date_name, material_name, company_name, value, unit):
         self._device_data = pd.read_excel(f"{device_data}", None)
         self._del_device_data = pd.read_excel(f"{del_device_data}", None)
         self._delite_device_list = []
@@ -29,7 +29,9 @@ class DeviceTransform:
         self._start_date_name = start_date_name
         self._end_date_name = end_date_name
         self._material_name = material_name
-        self._date = date
+        self._company_name = company_name
+        self._value = value
+        self._unit = unit
 
     def data_transform(self):
         self.device_process()
@@ -58,7 +60,10 @@ class DeviceTransform:
 
                         self._device_list.append({"코 드":append_data[0],
                                             "품 명":append_data[3],
+                                            "규격":append_data[4],
+                                            "단위":append_data[5],
                                             "재 질":append_data[7],
+                                            "수입(판매)업소":append_data[8],
                                             "최초등재일자": datetime.datetime.strptime(str(append_data[-3]), "%Y-%m-%d"),
                                             "적용일자": datetime.datetime.strptime(str(append_data[-2]), "%Y-%m-%d")
                                             })             
@@ -104,7 +109,10 @@ class DeviceTransform:
 
                         self._device_list.append({"코 드":del_numpy[end_count][0],
                                             "품 명":del_numpy[end_count][3],
+                                            "규격":del_numpy[end_count][4],
+                                            "단위":del_numpy[end_count][5],
                                             "재 질":del_numpy[end_count][7],
+                                            "수입(판매)업소":del_numpy[end_count][8],
                                             "최초등재일자": datetime.datetime.strptime(str(del_numpy[end_count][-3]), "%Y-%m-%d"),
                                             "적용일자": datetime.datetime.strptime(str(del_numpy[end_count][-2]), "%Y-%m-%d")
                                             })             
@@ -125,7 +133,10 @@ class DeviceTransform:
 
                         self._delite_device_list.append({"코 드":del_numpy[end_count][0],
                                             "품 명":del_numpy[end_count][3],
+                                            "규격":del_numpy[end_count][4],
+                                            "단위":del_numpy[end_count][5],
                                             "재 질":del_numpy[end_count][7],
+                                            "수입(판매)업소":del_numpy[end_count][8],
                                             "최초등재일자": datetime.datetime.strptime(str(del_numpy[end_count][-3]), "%Y-%m-%d"),
                                             "적용일자": datetime.datetime.strptime(str(del_numpy[end_count][-2]), "%Y-%m-%d")
                                             })             
@@ -141,16 +152,26 @@ class DeviceTransform:
                                         self._device_name : "concept_name",
                                         self._start_date_name : "valid_start_date",
                                         self._end_date_name : "valid_end_date",
-                                        self._material_name : "material"}, inplace=True)
+                                        self._material_name : "material",
+                                        self._company_name : "company_name",
+                                        self._value : "value",
+                                        self._unit : "unit"}, inplace=True)
+
+        self._delete_device_df["concept_code"] = self._delete_device_df["concept_code"].astype(str)
+        self._delete_device_df["concept_name"] = self._delete_device_df["concept_name"].astype(str)
+        self._delete_device_df["material"] = self._delete_device_df["material"].astype(str)
+        self._delete_device_df["company_name"] = self._delete_device_df["company_name"].astype(str)
+        self._delete_device_df["value"] = self._delete_device_df["value"].astype(str)
+        self._delete_device_df["unit"] = self._delete_device_df["unit"].astype(str)
 
         self._delete_device_df["domain_id"] = "Device"
         self._delete_device_df["vocabulary_id"] = "EDI"
         self._delete_device_df["concept_class_id"] = "Device"
         self._delete_device_df["valid_start_date"] = self._delete_device_df["valid_start_date"].apply(lambda x: datetime.datetime.strptime("1970-01-01", "%Y-%m-%d") if pd.isna(x) else x)
         self._delete_device_df["invalid_reason"] = "D"
-        self._delete_device_df["ancestor_concept_code"] = np.nan
-        self._delete_device_df["previous_concept_code"] = np.nan
-        self._delete_device_df["sanjung_name"] = np.nan
+        self._delete_device_df["ancestor_concept_code"] = None
+        self._delete_device_df["previous_concept_code"] = None
+        self._delete_device_df["sanjung_name"] = None
 
         # 문자열 양측 공백 제거
         self._delete_device_df["concept_code"] = self._delete_device_df["concept_code"].astype('str').str.strip()
@@ -158,13 +179,13 @@ class DeviceTransform:
 
 
         # 문자열에 공백만 있는 데이터가 있음. 이럴땐 Nan으로 처리가 안되어서 Nan으로 바꿔줘야함.
-        self._delete_device_df["concept_code"] = self._delete_device_df["concept_code"].replace(r'^\s*$', np.nan, regex=True)
-        self._delete_device_df["concept_name"] = self._delete_device_df["concept_name"].replace(r'^\s*$', np.nan, regex=True)
+        self._delete_device_df["concept_code"] = self._delete_device_df["concept_code"].replace(r'^\s*$', None, regex=True)
+        self._delete_device_df["concept_name"] = self._delete_device_df["concept_name"].replace(r'^\s*$', None, regex=True)
 
 
         self._delete_device_df = self._delete_device_df[["concept_code", "concept_name", "domain_id", "vocabulary_id", "concept_class_id",
                     "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-                    "material","sanjung_name"]]
+                    "material", "sanjung_name", "company_name" ,"value", "unit"]]
 
 
     def device_transform(self):
@@ -172,30 +193,41 @@ class DeviceTransform:
         self._device_df.rename(columns={self._device_code : "concept_code",
                                         self._device_name : "concept_name",
                                         self._start_date_name : "valid_start_date",
-                                        self._material_name : "material"}, inplace=True)
+                                        self._material_name : "material",
+                                        self._company_name : "company_name",
+                                        self._value : "value",
+                                        self._unit : "unit"
+                                        }, inplace=True)
         
+        self._device_df["concept_code"] = self._device_df["concept_code"].astype(str)
+        self._device_df["material"] = self._device_df["material"].astype(str)
+        self._device_df["company_name"] = self._device_df["company_name"].astype(str)
+        self._device_df["value"] = self._device_df["value"].astype(str)
+        self._device_df["unit"] = self._device_df["unit"].astype(str)
+
+
         self._device_df["domain_id"] = "Device"
         self._device_df["vocabulary_id"] = "EDI"
         self._device_df["concept_class_id"] = "Device"
         self._device_df["valid_start_date"] = self._device_df["valid_start_date"].apply(lambda x: datetime.datetime.strptime("1970-01-01", "%Y-%m-%d") if pd.isna(x) else x)
         self._device_df["valid_end_date"] = datetime.datetime.strptime("2099-12-31", "%Y-%m-%d")
-        self._device_df["invalid_reason"] = np.nan
-        self._device_df["ancestor_concept_code"] = np.nan
-        self._device_df["previous_concept_code"] = np.nan
-        self._device_df["sanjung_name"] = np.nan
+        self._device_df["invalid_reason"] = None
+        self._device_df["ancestor_concept_code"] = None
+        self._device_df["previous_concept_code"] = None
+        self._device_df["sanjung_name"] = None
 
         # 문자열 양측 공백 제거
         self._device_df["concept_code"] = self._device_df["concept_code"].str.strip()
         self._device_df["concept_name"] = self._device_df["concept_name"].str.strip()
 
         # 문자열에 공백만 있는 데이터가 있음. 이럴땐 Nan으로 처리가 안되어서 Nan으로 바꿔줘야함.
-        self._device_df["concept_code"] = self._device_df["concept_code"].replace(r'^\s*$', np.nan, regex=True)
-        self._device_df["concept_name"] = self._device_df["concept_name"].replace(r'^\s*$', np.nan, regex=True)
+        self._device_df["concept_code"] = self._device_df["concept_code"].replace(r'^\s*$', None, regex=True)
+        self._device_df["concept_name"] = self._device_df["concept_name"].replace(r'^\s*$', None, regex=True)
 
 
         self._device_df = self._device_df[["concept_code", "concept_name", "domain_id", "vocabulary_id", "concept_class_id",
                     "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-                    "material","sanjung_name"]]
+                    "material", "sanjung_name", "company_name" ,"value", "unit"]]
 
     def make_device_df(self):
 
@@ -208,9 +240,12 @@ class DeviceTransform:
 
         col = ["concept_code", "concept_name", "domain_id", "vocabulary_id", "concept_class_id",
                             "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-                            "material","sanjung_name"]
+                            "material","sanjung_name", "company_name" ,"value", "unit"]
         result_device = pd.DataFrame(data, columns=col)
 
+        # 날짜 이상한거 제거
+        result_device = result_device[result_device['valid_start_date'] <= result_device['valid_end_date']]
+    
         return result_device
 
 class DeviceTranslate:
@@ -315,7 +350,7 @@ class DeviceTranslate:
 
         result_df = result_df[["concept_code", "concept_name","concept_synonym","domain_id", "vocabulary_id", "concept_class_id",
                     "valid_start_date", "valid_end_date", "invalid_reason","ancestor_concept_code","previous_concept_code",
-                    "material","sanjung_name"]]
+                    "material", "sanjung_name", "company_name" ,"value", "unit"]]
         
         result_df["concept_name"].replace('\n', '').replace('\r', '')
         result_df["concept_synonym"].replace('\n', '').replace('\r', '')

@@ -40,8 +40,9 @@ database = EDI DB name
 connect = DBConnect(host="",port="", user="", password="",database="")
 
 
-DeviceTransform().data_transform() -> 고시 CSV를 OMOP 형태로 변환해줍니다.
-DeviceTranslate().data_translate() -> concept_name 열에서 한글을 영어로 변환해줍니다. (translation csv 저장 후 concept_synonym에 변환)
-connect.update_device() -> 변환이 완료 된 omop을 DB에 업데이트 합니다.
+Transform() -> 고시파일을 OMOP TABLE 형태로 변환
+Translate() -> 영문 변환이 필요한 데이터를 Google Translate를 사용하여 변환시킴
+update() -> DataBase에 적재
 
+update_drug_relationship() -> Drug 주성분코드 추적을 위한 Table
 ```
