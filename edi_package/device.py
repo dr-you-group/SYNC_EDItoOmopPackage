@@ -250,11 +250,12 @@ class DeviceTransform:
 
 class DeviceTranslate:
 
-    def __init__(self, device_df, translation_path):
+    def __init__(self, device_df, translation_path, num_cores):
         self._device_df = device_df
         self._translation_df = pd.read_csv(translation_path)
         self._translation_df_list = None
         self._translate_list = []
+        self._num_cores= num_cores
         self.result_translate = multiprocessing.Manager().list()
 
 
@@ -306,7 +307,7 @@ class DeviceTranslate:
                 time.sleep(2)
                 translate_list = list(set(self._translate_list))[chunk:chunk+100]
                 # return translate_list
-                pool = multiprocessing.Pool(10)
+                pool = multiprocessing.Pool(self._num_cores)
                 
                 pool.map(self.multi_process, tqdm(translate_list))
 

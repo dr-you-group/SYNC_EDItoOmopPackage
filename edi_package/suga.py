@@ -130,12 +130,13 @@ class SugaTransform:
     
 
 class SugaTranslate:
-    def __init__(self, suga_df, translation_path):
+    def __init__(self, suga_df, translation_path, num_cores):
         self._suga_df = suga_df
         self._translation_path = translation_path
         self._translation_df = pd.read_csv(self._translation_path)
         self._translation_df_list = None
         self._translate_list = []
+        self._num_cores = num_cores
         self.result_translate = multiprocessing.Manager().list()
 
         
@@ -174,7 +175,7 @@ class SugaTranslate:
             time.sleep(2)
             translate_list = list(set(self._translate_list))[chunk:chunk+100]
             # return translate_list
-            pool = multiprocessing.Pool(10)
+            pool = multiprocessing.Pool(self._num_cores)
             
             pool.map(self.multi_process_suga, tqdm(translate_list))
 
