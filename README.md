@@ -1,6 +1,7 @@
 # EDItoOmopPackage
   
 jupyter를 이용해서 run_edi_package.ipynb 를 사용하는것을 권장 드립니다.  
+python 3.12 버전 이하를 사용하시길 바랍니다.
 
 ## Prepare  
 ``` python
