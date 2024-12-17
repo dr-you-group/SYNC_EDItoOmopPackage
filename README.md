@@ -42,8 +42,8 @@ connect = DBConnect(host="",port="", user="", password="",database="")
 
 Transform() -> 고시파일을 OMOP TABLE 형태로 변환
 Translate() -> 영문 변환이 필요한 데이터를 Google Translate를 사용하여 변환시킴
+- num_cores 옵션은 Google Translate를 멀티프로세싱으로 처리하기 위함 (프로그램을 실행하는 컴퓨터 Core 개수에 따라 적절하게 사용)
 update() -> DataBase에 적재
-
 update_drug_relationship() -> Drug 주성분코드 추적을 위한 Table
 ```
 
