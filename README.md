@@ -14,7 +14,7 @@ openpyxl==3.1.2
 ```  
 **GOOGLE TRANSLATION**  
 EDI concept name에 대해서 한글을 영문으로 바꾸어야 합니다. 이에 패키지는 Google Translation을 사용 합니다.  
-Google Translation을 사용 할 수 있는 API KEY를 준비 해주세요. 
+Google Translation을 사용 할 수 있는 ID를 준비해주세요.
 
 **GOOGLE TRANSLATION URL**  
   
