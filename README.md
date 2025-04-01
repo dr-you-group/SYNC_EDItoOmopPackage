@@ -3,6 +3,16 @@
 We recommend using run_edi_package.ipynb with Jupyter for convenience.
 Please use Python version 3.12 or lower.
 
+## Prerequisites
+Before using SYNC pacakge, you need to download the data sources. Every EDI codes are managed by Health Insurance Review & Assessment Service (HIRA).
+You can download the data below.
+
+https://www.hira.or.kr/rc/insu/insuadtcrtr/InsuAdtCrtrList.do?pgmid=HIRAA030069000400&WT.gnb=%EB%B3%B4%ED%97%98%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80
+- Device (keyword: 치료재료/medical materials) and Suga (keyword: 수가/medical fee) can be downloaded from here
+
+https://www.hira.or.kr/bbsDummy.do?pgmid=HIRAA030014050000&brdScnBltNo=4&brdBltNo=1676&pageIndex=1&pageIndex2=1
+- Drug can be downloaded from here
+
 ## Prepare  
 ``` python
 PIP LIST
@@ -48,13 +58,3 @@ Translate() -> Translates data requiring English conversion using Google Transla
 update() -> Loads into the Database
 update_drug_relationship() -> Table for tracking Drug main ingredient codes
 ```
-
-## 고시 다운로드
-
-https://www.hira.or.kr/rc/insu/insuadtcrtr/InsuAdtCrtrList.do?pgmid=HIRAA030069000400&WT.gnb=%EB%B3%B4%ED%97%98%EC%9D%B8%EC%A0%95%EA%B8%B0%EC%A4%80
-
--  Device (keyword: 치료재료/medical materials) and Suga (keyword: 수가/medical fee) can be downloaded from here
-
-https://www.hira.or.kr/bbsDummy.do?pgmid=HIRAA030014050000&brdScnBltNo=4&brdBltNo=1676&pageIndex=1&pageIndex2=1
-
-- Drug can be downloaded from here
